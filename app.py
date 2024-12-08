@@ -5,8 +5,14 @@ import json
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
-
+CORS(app, 
+     resources={r"/api/*": {
+         "origins": ["http://localhost:5173"],
+         "methods": ["GET", "POST", "OPTIONS"],
+         "allow_headers": ["Content-Type", "Accept"],
+         "supports_credentials": True
+     }},
+     supports_credentials=True)
 def init_db():
     conn = sqlite3.connect('polls.db')
     c = conn.cursor()
@@ -17,6 +23,7 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             email TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
+            name TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -25,8 +32,8 @@ def init_db():
     c.execute('SELECT * FROM users WHERE email = ?', ('demo@womp.com',))
     if not c.fetchone():
         c.execute(
-            'INSERT INTO users (email, password) VALUES (?, ?)',
-            ('demo@womp.com', generate_password_hash('demo123'))
+            'INSERT INTO users (email, password, name) VALUES (?, ?, ?)',
+            ('demo@womp.com', generate_password_hash('demo123'), 'Demo User')
         )
     
     # Create polls table
@@ -50,6 +57,12 @@ def init_db():
     ''')
     
     conn.commit()
+        
+    # Verify the table structure
+    c.execute("PRAGMA table_info(users)")
+    columns = c.fetchall()
+    print("Users table structure:", columns)  # Debug print
+    
     conn.close()
 
 # Initialize database on startup
@@ -107,11 +120,17 @@ def vote(poll_id):
     
     return jsonify({'message': 'Vote recorded successfully'})
 
-@app.route('/api/auth/login', methods=['POST'])
+@app.route('/api/auth/login', methods=['POST', 'OPTIONS'])
 def login():
+    # Handle preflight request
+    if request.method == 'OPTIONS':
+        return '', 200
+        
     data = request.json
     email = data.get('email')
     password = data.get('password')
+    
+    print(f"Login attempt for email: {email}")  # Debug print
     
     conn = sqlite3.connect('polls.db')
     c = conn.cursor()
@@ -122,7 +141,7 @@ def login():
     if user and check_password_hash(user[2], password):
         return jsonify({
             'success': True,
-            'user': {'email': user[1]}
+            'user': {'email': user[1], 'name': user[3]}
         })
     
     return jsonify({
@@ -130,35 +149,57 @@ def login():
         'message': 'Invalid credentials'
     }), 401
 
-@app.route('/api/auth/register', methods=['POST'])
+@app.route('/api/auth/register', methods=['POST', 'OPTIONS'])
 def register():
+    # Handle preflight request
+    if request.method == 'OPTIONS':
+        return '', 200
+        
     data = request.json
     email = data.get('email')
     password = data.get('password')
+    name = data.get('name')
     
-    if not email or not password:
-        return jsonify({'success': False, 'message': 'Missing required fields'}), 400
+    print(f"Parsed fields: email={email}, password={'*'*len(password) if password else None}, name={name}")  # Debug print
+
+    if not email or not password or not name:
+        missing = []
+        if not email: missing.append('email')
+        if not password: missing.append('password')
+        if not name: missing.append('name')
+        return jsonify({
+            'success': False, 
+            'message': f'Missing required fields: {", ".join(missing)}'
+        }), 400
     
     conn = sqlite3.connect('polls.db')
     c = conn.cursor()
     
     try:
         c.execute(
-            'INSERT INTO users (email, password) VALUES (?, ?)',
-            (email, generate_password_hash(password))
+            'INSERT INTO users (email, password, name) VALUES (?, ?, ?)',
+            (email, generate_password_hash(password), name)
         )
         conn.commit()
         conn.close()
         return jsonify({
             'success': True,
-            'user': {'email': email}
+            'user': {'email': email, 'name': name}
         })
-    except sqlite3.IntegrityError:
+    except sqlite3.IntegrityError as e:
+        print(f"Database error: {e}")  # Debug print
         conn.close()
         return jsonify({
             'success': False,
             'message': 'Email already exists'
         }), 400
+    except Exception as e:
+        print(f"Unexpected error: {e}")  # Debug print
+        conn.close()
+        return jsonify({
+            'success': False,
+            'message': str(e)
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True) 

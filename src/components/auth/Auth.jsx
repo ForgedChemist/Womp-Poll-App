@@ -11,6 +11,7 @@ export function Auth() {
 
   const handleSubmit = async (formData) => {
     setError('');
+    console.log('Auth component received form data:', formData); // Debug log
     
     try {
       if (isLogin) {
@@ -24,6 +25,7 @@ export function Auth() {
         }
       } else {
         const result = await register({
+          name: formData.name,      // Make sure name is included
           email: formData.email,
           password: formData.password
         });

@@ -12,11 +12,14 @@ export function AuthProvider({ children }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(credentials),
       });
       
       const data = await response.json();
+      console.log('Login response:', data); // Debug log
       
       if (data.success) {
         setUser(data.user);
@@ -35,17 +38,20 @@ export function AuthProvider({ children }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(credentials),
       });
       
       const data = await response.json();
+      console.log('Registration response:', data); // Debug log
       
       if (data.success) {
         setUser(data.user);
         return { success: true };
       }
-      return { success: false, message: data.message };
+      return { success: false, message: data.message || 'Registration failed' };
     } catch (error) {
       console.error('Registration error:', error);
       return { success: false, message: 'An error occurred during registration' };
