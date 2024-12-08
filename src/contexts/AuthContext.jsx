@@ -19,7 +19,7 @@ export function AuthProvider({ children }) {
       });
       
       const data = await response.json();
-      console.log('Login response:', data); // Debug log
+      console.log('Login response:', data);
       
       if (data.success) {
         setUser(data.user);
