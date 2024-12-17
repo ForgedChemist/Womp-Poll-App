@@ -4,5 +4,17 @@ Flask-CORS==4.0.0
 
 # Security & Utils
 Werkzeug==3.0.1
+python-dotenv==1.0.0
+PyJWT==2.8.0
+
+# Date/Time Handling
+python-dateutil==2.8.2
+
+# Data Validation
+jsonschema==4.21.1
+
+# Development & Debug
+pytest==8.0.0
+python-dotenv==1.0.0
 
 
