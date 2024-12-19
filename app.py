@@ -142,7 +142,11 @@ def get_polls():
 @app.route('/api/polls/<int:poll_id>/vote', methods=['POST'])
 def vote(poll_id):
     data = request.json
-    option_index = data.get('optionIndex')
+    options = data.get('options', [])
+    
+    user_id = request.cookies.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Unauthorized'}), 401
     
     conn = sqlite3.connect('polls.db')
     c = conn.cursor()
@@ -156,10 +160,18 @@ def vote(poll_id):
         return jsonify({'error': 'Poll is closed or does not exist'}), 403
     
     # If poll is open, record the vote
-    c.execute('INSERT INTO votes (poll_id, option_index) VALUES (?, ?)', (poll_id, option_index))
-    conn.commit()
-    conn.close()
-    
+    try:
+        for option_index in options:
+            option_index = int(option_index)  # Ensure option_index is an integer
+            # Insert the vote for each selected option
+            c.execute('INSERT INTO votes (poll_id, option_index) VALUES (?, ?)', (poll_id, option_index))
+        
+        conn.commit()
+        return jsonify({'message': 'Votes recorded successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
     return jsonify({'message': 'Vote recorded successfully'})
 
 @app.route('/api/auth/login', methods=['POST', 'OPTIONS'])
