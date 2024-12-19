@@ -7,6 +7,7 @@ export function PollVoting() {
   const { pollId } = useParams(); // Get pollId from URL parameters
   const [poll, setPoll] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState(new Set());
+  const [errorMessage, setErrorMessage] = useState(''); // State for error message
 
   useEffect(() => {
     const fetchPoll = async () => {
@@ -38,6 +39,11 @@ export function PollVoting() {
           body: JSON.stringify({ options: Array.from(selectedOptions) }),
         });
 
+        if (response.status === 403) {
+          setErrorMessage('This poll is closed.'); // Set error message
+          return; // Prevent further execution
+        }
+
         if (!response.ok) throw new Error('Failed to submit vote');
         navigate(`/poll/${pollId}/results`);
       } catch (error) {
@@ -54,6 +60,8 @@ export function PollVoting() {
         <div className="bg-white rounded-lg shadow-md p-6">
           <h1 className="text-2xl font-bold text-black mb-4">{poll.question}</h1>
           
+          {errorMessage && <div className="text-red-500 mb-4">{errorMessage}</div>}
+
           <div className="flex items-center text-sm text-gray-500 mb-6 space-x-4">
             <span className="flex items-center">
               <Users className="w-4 h-4 mr-1" />
@@ -92,10 +100,10 @@ export function PollVoting() {
 
             <button
               type="submit"
-              disabled={selectedOptions.size === 0}
-              className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              disabled={selectedOptions.size === 0 || errorMessage !== ''}
+              className={`w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors ${errorMessage ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              Submit Vote
+              {errorMessage ? 'Cannot Submit Vote' : 'Submit Vote'}
             </button>
           </form>
         </div>
