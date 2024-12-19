@@ -1,6 +1,19 @@
 import React from 'react';
-import { Users, Clock, X, ExternalLink } from 'lucide-react';
+import { Users, Clock, X, ExternalLink, Share2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
+
+const handleShare = () => {
+  const pollUrl = window.location.href; // Get the current URL
+  navigator.clipboard.writeText(pollUrl) // Copy the URL to clipboard
+    .then(() => {
+      setShareMessage('Poll link copied to clipboard!'); // Set success message
+      setTimeout(() => setShareMessage(''), 3000); // Clear message after 3 seconds
+    })
+    .catch(err => {
+      console.error('Failed to copy: ', err);
+    });
+};
 
 export function PollCard({ poll, onClose }) {
   return (
@@ -17,6 +30,13 @@ export function PollCard({ poll, onClose }) {
               >
                 <ExternalLink className="w-4 h-4" />
               </Link>
+              <button
+                onClick={handleShare}
+                className="p-2 text-gray-500 hover:text-black rounded-full hover:bg-gray-100 transition-colors"
+                title="Share Poll"
+              >
+                <Share2 className="w-4 h-4" />
+              </button>
               <button
                 onClick={onClose}
                 className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
