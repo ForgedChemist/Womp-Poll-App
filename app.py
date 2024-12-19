@@ -17,8 +17,8 @@ def init_db():
     conn = sqlite3.connect('polls.db')
     c = conn.cursor()
     
-    # Add users table
-    c.execute('''
+    # Create users table if it doesn't exist
+    c.execute(''' 
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             email TEXT UNIQUE NOT NULL,
@@ -36,12 +36,9 @@ def init_db():
             ('demo@womp.com', generate_password_hash('demo123'), 'Demo User')
         )
     
-    # Drop existing polls table if it exists
-    c.execute('DROP TABLE IF EXISTS polls')
-    
-    # Create new polls table with updated schema
-    c.execute('''
-        CREATE TABLE polls (
+    # Create polls table if it doesn't exist
+    c.execute(''' 
+        CREATE TABLE IF NOT EXISTS polls (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             question TEXT NOT NULL,
             options TEXT NOT NULL,
@@ -52,8 +49,8 @@ def init_db():
         )
     ''')
     
-    # Create votes table
-    c.execute('''
+    # Create votes table if it doesn't exist
+    c.execute(''' 
         CREATE TABLE IF NOT EXISTS votes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             poll_id INTEGER,
