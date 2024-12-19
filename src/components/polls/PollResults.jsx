@@ -6,7 +6,8 @@ export function PollResults() {
   const { pollId } = useParams(); // Get pollId from URL parameters
   const [poll, setPoll] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const [shareMessage, setShareMessage] = useState('');
+  
   useEffect(() => {
     const fetchPollResults = async () => {
       try {
@@ -27,7 +28,15 @@ export function PollResults() {
   }, [pollId]);
 
   const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
+    const pollUrl = window.location.href; // Get the current URL
+    navigator.clipboard.writeText(pollUrl) // Copy the URL to clipboard
+      .then(() => {
+        setShareMessage('Poll link copied to clipboard!'); // Set success message
+        setTimeout(() => setShareMessage(''), 3000); // Clear message after 3 seconds
+      })
+      .catch(err => {
+        console.error('Failed to copy: ', err);
+      });
   };
 
   if (loading) return <div>Loading...</div>;
@@ -47,6 +56,8 @@ export function PollResults() {
               <Share2 className="w-5 h-5" />
             </button>
           </div>
+
+          {shareMessage && <div className="text-green-500 mb-4">{shareMessage}</div>}
 
           <div className="flex items-center text-sm text-gray-500 mb-6 space-x-4">
             <span className="flex items-center">
