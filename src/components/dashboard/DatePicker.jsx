@@ -26,15 +26,24 @@ export function DatePicker({ value, onChange }) {
     setView('time');
   };
 
-  const handleTimeSelect = (time) => {
+  function handleTimeSelect(time) {
     setSelectedTime(time);
     const dateObj = selectedDate || new Date();
     const [hours, minutes] = time.split(':');
     dateObj.setHours(parseInt(hours), parseInt(minutes));
-    onChange(dateObj);
+    
+    // Format the dateObj to "name of the day dd/mm/yyyy HH:mm (timezone)"
+    const dayName = format(dateObj, 'EEEE'); // Get the full name of the day
+    const formattedDate = format(dateObj, 'dd/MM/yyyy'); // Format the date
+    const timezone = dateObj.toLocaleString('en-US', { timeZoneName: 'short' }).split(' ').pop(); // Get timezone
+
+    // Include hours and minutes in the final formatted date
+    const finalFormattedDate = `${dayName} ${formattedDate} ${hours}:${minutes} (${timezone})`; // Combine all parts
+    onChange(finalFormattedDate); // Pass the formatted date to onChange
+
     setIsOpen(false);
     setView('date');
-  };
+}
 
   const generateDates = () => {
     const today = new Date();
