@@ -111,27 +111,30 @@ def get_polls():
         
         formatted_polls = []
         for poll in polls:
+            # Get total votes for the specific poll from the votes table
+            c.execute('SELECT COUNT(*) FROM votes WHERE poll_id = ?', (poll[0],))
+            total_votes = c.fetchone()[0]  # Get the total count of votes for this poll
+            
+            options = json.loads(poll[2])
             # Get vote counts for each option
             c.execute('SELECT option_index, COUNT(*) FROM votes WHERE poll_id = ? GROUP BY option_index', (poll[0],))
             votes = dict(c.fetchall())
             
-            options = json.loads(poll[2])
             formatted_polls.append({
                 'id': poll[0],
                 'question': poll[1],
                 'options': options,
-                'votes': [votes.get(i, 0) for i in range(len(options))],
+                'votes': [votes.get(i, 0) for i in range(len(options))],  # Votes for each option
+                'total_votes': total_votes,  # Total votes from the votes table
                 'created_at': poll[3],
                 'created_by': poll[4],
                 'creator_name': poll[6],
                 'is_open': bool(poll[5])
             })
         
-        print("Formatted polls:", formatted_polls)  # Debug print
         return jsonify(formatted_polls)
         
     except Exception as e:
-        print("Error:", str(e))  # Debug print
         return jsonify({'error': str(e)}), 500
     finally:
         conn.close()
@@ -275,6 +278,35 @@ def close_poll(poll_id):
     conn.close()
     
     return jsonify({'message': 'Poll closed successfully'})
+
+@app.route('/api/polls/<int:poll_id>', methods=['GET'])
+def get_poll(poll_id):
+    conn = sqlite3.connect('polls.db')
+    c = conn.cursor()
+    
+    try:
+        # Fetch the poll by ID
+        c.execute('SELECT * FROM polls WHERE id = ?', (poll_id,))
+        poll = c.fetchone()
+        
+        if poll is None:
+            return jsonify({'error': 'Poll not found'}), 404
+        
+        # Format the poll data as needed
+        poll_data = {
+            'id': poll[0],
+            'question': poll[1],
+            'options': json.loads(poll[2]),  # Assuming options are stored as JSON
+            'created_at': poll[3],
+            'created_by': poll[4],
+            'is_open': bool(poll[5])
+        }
+        
+        return jsonify(poll_data), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
 
 if __name__ == '__main__':
     app.run(debug=True) 

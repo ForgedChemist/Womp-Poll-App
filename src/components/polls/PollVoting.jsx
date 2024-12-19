@@ -1,31 +1,52 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Users, Clock } from 'lucide-react';
 
-export function PollVoting({ pollId }) {
+export function PollVoting() {
   const navigate = useNavigate();
-  const [selectedOption, setSelectedOption] = useState(null);
-  
-  // Mock poll data - in production this would come from an API
-  const poll = {
-    id: pollId,
-    question: "What's your favorite programming language?",
-    created: "2 hours ago",
-    votes: 150,
-    options: [
-      { id: 1, text: "JavaScript" },
-      { id: 2, text: "Python" },
-      { id: 3, text: "Java" }
-    ]
-  };
+  const { pollId } = useParams(); // Get pollId from URL parameters
+  const [poll, setPoll] = useState(null);
+  const [selectedOptions, setSelectedOptions] = useState(new Set());
 
-  const handleVote = (e) => {
+  useEffect(() => {
+    const fetchPoll = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/polls/${pollId}`, {
+          credentials: 'include',
+        });
+        if (!response.ok) throw new Error('Failed to fetch poll');
+        const data = await response.json();
+        setPoll(data);
+      } catch (error) {
+        console.error('Error fetching poll:', error);
+      }
+    };
+
+    fetchPoll();
+  }, [pollId]);
+
+  const handleVote = async (e) => {
     e.preventDefault();
-    if (selectedOption) {
-      // In production, this would be an API call
-      navigate(`/poll/${pollId}/results`);
+    if (selectedOptions.size > 0) {
+      try {
+        const response = await fetch(`http://localhost:5000/api/polls/${pollId}/vote`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ options: Array.from(selectedOptions) }),
+        });
+
+        if (!response.ok) throw new Error('Failed to submit vote');
+        navigate(`/poll/${pollId}/results`);
+      } catch (error) {
+        console.error('Error submitting vote:', error);
+      }
     }
   };
+
+  if (!poll) return <div>Loading...</div>;
 
   return (
     <div className="min-h-screen bg-gray-50 pt-16">
@@ -36,41 +57,42 @@ export function PollVoting({ pollId }) {
           <div className="flex items-center text-sm text-gray-500 mb-6 space-x-4">
             <span className="flex items-center">
               <Users className="w-4 h-4 mr-1" />
-              {poll.votes} votes
+              {poll.total_votes} votes
             </span>
             <span className="flex items-center">
               <Clock className="w-4 h-4 mr-1" />
-              {poll.created}
+              {poll.created_at}
             </span>
           </div>
 
           <form onSubmit={handleVote} className="space-y-4">
-            {poll.options.map((option) => (
-              <label
-                key={option.id}
-                className={`block p-4 border rounded-lg cursor-pointer transition-all ${
-                  selectedOption === option.id
-                    ? 'border-black bg-gray-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
+            {poll.options.map((option, index) => (
+              <label key={index} className="block p-4 border rounded-lg cursor-pointer transition-all">
                 <div className="flex items-center">
                   <input
-                    type="radio"
+                    type="checkbox"
                     name="poll-option"
-                    value={option.id}
-                    checked={selectedOption === option.id}
-                    onChange={() => setSelectedOption(option.id)}
+                    value={index}
+                    checked={selectedOptions.has(index)}
+                    onChange={() => {
+                      const newSelectedOptions = new Set(selectedOptions);
+                      if (newSelectedOptions.has(index)) {
+                        newSelectedOptions.delete(index);
+                      } else {
+                        newSelectedOptions.add(index);
+                      }
+                      setSelectedOptions(newSelectedOptions);
+                    }}
                     className="w-4 h-4 text-black"
                   />
-                  <span className="ml-3">{option.text}</span>
+                  <span className="ml-3">{option}</span>
                 </div>
               </label>
             ))}
 
             <button
               type="submit"
-              disabled={!selectedOption}
+              disabled={selectedOptions.size === 0}
               className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               Submit Vote

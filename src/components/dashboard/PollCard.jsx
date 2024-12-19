@@ -31,7 +31,7 @@ export function PollCard({ poll, onClose }) {
       <div className="flex items-center text-sm text-gray-500 mb-4 space-x-4">
         <span className="flex items-center">
           <Users className="w-4 h-4 mr-1" />
-          {poll.votes.reduce((a, b) => a + b, 0)} votes
+          {poll.total_votes} votes
         </span>
         <span className="flex items-center">
           <Clock className="w-4 h-4 mr-1" />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { Header } from './components/layout/Header';
@@ -10,6 +10,7 @@ import { Auth } from './components/auth/Auth';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { PollVoting } from './components/polls/PollVoting';
 import { PollResults } from './components/polls/PollResults';
+import { MyPolls } from './components/dashboard/MyPolls';
 
 function HomePage() {
   return (
@@ -26,7 +27,7 @@ function HomePage() {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <Router>
         <div className="min-h-screen bg-white">
           <Header />
           <Routes>
@@ -40,11 +41,12 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path="/poll/:id" element={<PollVoting />} />
-            <Route path="/poll/:id/results" element={<PollResults />} />
+            <Route path="/poll/:pollId" element={<PollVoting />} />
+            <Route path="/poll/:pollId/results" element={<PollResults />} />
+            <Route path="/mypolls" element={<MyPolls />} />
           </Routes>
         </div>
-      </BrowserRouter>
+      </Router>
     </AuthProvider>
   );
 }
