@@ -56,6 +56,9 @@ export function CreatePollForm() {
       // Immediately refresh the polls list after successful creation
       refreshPolls();
       
+      // Reload the page
+      window.location.reload();
+
     } catch (error) {
       console.error('Error creating poll:', error);
       // TODO: Add error notification
