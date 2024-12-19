@@ -11,7 +11,7 @@ export function HowItWorks() {
         {/* Add more content or features here */}
       </div>
       <div className="flex justify-center">
-        <hr className="border-t border-gray-300 w-1/2 my-8" /> {/* Shorter dividing bar */}
+        <hr className="border-t border-gray-300 w-1/2 my-8" /> 
       </div>
     </section>
   );
