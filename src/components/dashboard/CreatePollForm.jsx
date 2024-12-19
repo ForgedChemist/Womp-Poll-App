@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Plus, Minus } from 'lucide-react';
 import { DatePicker } from './DatePicker';
+import { usePollData } from '../../hooks/usePollData';
 
 export function CreatePollForm() {
   const [options, setOptions] = useState(['', '']);
   const [question, setQuestion] = useState('');
+  const { refreshPolls } = usePollData();
 
   const addOption = () => {
     setOptions([...options, '']);
@@ -22,10 +24,42 @@ export function CreatePollForm() {
     setOptions(newOptions);
   };
 
-  const handleSubmit = (e) => {
+  const handleDateSelect = (index, date) => {
+    const formattedDateTime = date.toString().replace(/GMT[+-]\d{4}\s/, '');
+    handleOptionChange(index, formattedDateTime);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle poll creation
-    console.log({ question, options });
+    
+    try {
+      const response = await fetch('http://localhost:5000/api/polls', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ question, options }),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create poll');
+      }
+
+      const data = await response.json();
+      console.log('Poll created:', data);
+      
+      // Reset form
+      setQuestion('');
+      setOptions(['', '']);
+      
+      // Immediately refresh the polls list after successful creation
+      refreshPolls();
+      
+    } catch (error) {
+      console.error('Error creating poll:', error);
+      // TODO: Add error notification
+    }
   };
 
   return (

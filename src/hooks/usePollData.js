@@ -1,45 +1,45 @@
-import { useState } from 'react';
-
-const initialPolls = [
-  {
-    id: 1,
-    question: "What's your favorite programming language?",
-    votes: 150,
-    created: "2 hours ago",
-    active: true,
-    options: [
-      { text: "JavaScript", percentage: 45 },
-      { text: "Python", percentage: 30 },
-      { text: "Java", percentage: 25 }
-    ]
-  },
-  {
-    id: 2,
-    question: 'How often do you code?',
-    votes: 89,
-    created: '1 day ago',
-    active: true,
-    options: [
-      { text: "Daily", percentage: 65 },
-      { text: "Weekly", percentage: 25 },
-      { text: "Monthly", percentage: 10 }
-    ]
-  }
-];
+import { useState, useEffect } from 'react';
 
 export function usePollData() {
-  const [polls, setPolls] = useState(initialPolls);
+  const [polls, setPolls] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const closePoll = (pollId) => {
-    setPolls(polls.map(poll => 
-      poll.id === pollId 
-        ? { ...poll, active: false }
-        : poll
-    ));
+  const fetchPolls = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/polls', {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch polls');
+      const data = await response.json();
+      setPolls(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return {
-    polls,
-    closePoll
+  const closePoll = async (pollId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/polls/${pollId}/close`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to close poll');
+      
+      // Update local state to reflect the closed poll
+      setPolls(polls.map(poll => 
+        poll.id === pollId ? { ...poll, is_open: false } : poll
+      ));
+    } catch (err) {
+      setError(err.message);
+    }
   };
+
+  useEffect(() => {
+    fetchPolls();
+  }, []);
+
+  return { polls, loading, error, closePoll, refreshPolls: fetchPolls };
 }

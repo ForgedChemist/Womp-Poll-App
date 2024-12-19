@@ -24,7 +24,6 @@ export function Header() {
           <nav className="hidden md:flex items-center space-x-8">
             <a href="#how-it-works" className="text-gray-600 hover:text-black">How It Works</a>
             <a href="#about" className="text-gray-600 hover:text-black">About Us</a>
-            <a href="#blog" className="text-gray-600 hover:text-black">Blog</a>
             
             {user ? (
               <div className="flex items-center space-x-4">
