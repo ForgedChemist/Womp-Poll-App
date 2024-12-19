@@ -320,5 +320,51 @@ def get_poll(poll_id):
     finally:
         conn.close()
 
+@app.route('/api/polls/<int:poll_id>/results', methods=['GET'])
+def get_poll_results(poll_id):
+    conn = sqlite3.connect('polls.db')
+    c = conn.cursor()
+    
+    try:
+        # Fetch the poll by ID
+        c.execute('SELECT * FROM polls WHERE id = ?', (poll_id,))
+        poll = c.fetchone()
+        
+        if poll is None:
+            return jsonify({'error': 'Poll not found'}), 404
+        
+        # Fetch votes for the poll
+        c.execute('SELECT option_index, COUNT(*) as vote_count FROM votes WHERE poll_id = ? GROUP BY option_index', (poll_id,))
+        votes = dict(c.fetchall())
+        
+        # Prepare options with vote counts and percentages
+        options = json.loads(poll[2])  # Assuming options are stored as JSON
+        total_votes = sum(votes.values()) if votes else 0
+        
+        formatted_options = []
+        for index, option in enumerate(options):
+            vote_count = votes.get(index, 0)
+            percentage = (vote_count / total_votes * 100) if total_votes > 0 else 0
+            formatted_options.append({
+                'id': index + 1,  # Assuming IDs start from 1
+                'text': option,
+                'votes': vote_count,
+                'percentage': percentage,
+            })
+        
+        poll_data = {
+            'id': poll[0],
+            'question': poll[1],
+            'created_at': poll[3],
+            'total_votes': total_votes,
+            'options': formatted_options,
+        }
+        
+        return jsonify(poll_data), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
 if __name__ == '__main__':
     app.run(debug=True) 
