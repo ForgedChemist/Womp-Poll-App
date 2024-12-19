@@ -11,6 +11,8 @@ import { Dashboard } from './components/dashboard/Dashboard';
 import { PollVoting } from './components/polls/PollVoting';
 import { PollResults } from './components/polls/PollResults';
 import { MyPolls } from './components/dashboard/MyPolls';
+import { HowItWorks } from './components/sections/HowItWorks';
+import { AboutUs } from './components/sections/AboutUs';
 
 function HomePage() {
   return (
@@ -18,6 +20,8 @@ function HomePage() {
       <main>
         <Hero />
         <Benefits />
+        <HowItWorks />
+        <AboutUs />
       </main>
       <Footer />
     </>
