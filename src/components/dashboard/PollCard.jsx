@@ -2,22 +2,26 @@ import React from 'react';
 import { Users, Clock, X, ExternalLink, Share2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-
-const handleShare = () => {
-  const pollUrl = window.location.href; // Get the current URL
-  navigator.clipboard.writeText(pollUrl) // Copy the URL to clipboard
-    .then(() => {
-      setShareMessage('Poll link copied to clipboard!'); // Set success message
-      setTimeout(() => setShareMessage(''), 3000); // Clear message after 3 seconds
-    })
-    .catch(err => {
-      console.error('Failed to copy: ', err);
-    });
-};
-
 export function PollCard({ poll, onClose }) {
+  const [shareMessage, setShareMessage] = React.useState('');
+
+  const handleShare = () => {
+    const pollUrl = `${window.location.origin}/poll/${poll.id}`; // Construct poll-specific URL
+    navigator.clipboard.writeText(pollUrl)
+      .then(() => {
+        setShareMessage('Poll link copied to clipboard!');
+        setTimeout(() => setShareMessage(''), 3000);
+      })
+      .catch(err => {
+        console.error('Failed to copy: ', err);
+      });
+  };
+
   return (
     <div className="p-4 border border-gray-200 rounded hover:shadow-md transition-shadow">
+      {shareMessage && (
+        <div className="mb-2 text-sm text-green-600">{shareMessage}</div>
+      )}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-semibold text-black">{poll.question}</h3>
         <div className="flex items-center gap-2">
