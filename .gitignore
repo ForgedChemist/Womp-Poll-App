@@ -25,3 +25,6 @@ dist-ssr
 
 
 .bolt
+
+# User-specific files
+polls.db
