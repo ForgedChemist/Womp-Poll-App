@@ -250,10 +250,15 @@ def register():
         )
         conn.commit()
         conn.close()
-        return jsonify({
+        
+        # Create response and explicitly remove user_id cookie
+        response = jsonify({
             'success': True,
             'user': {'email': email, 'name': name}
         })
+        response.delete_cookie('user_id')  # Add this line to remove any existing user_id cookie
+        return response
+        
     except sqlite3.IntegrityError as e:
         print(f"Database error: {e}")  # Debug print
         conn.close()
@@ -366,4 +371,4 @@ def get_poll_results(poll_id):
         conn.close()
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    app.run(debug=True)
