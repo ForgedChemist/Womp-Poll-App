@@ -9,8 +9,10 @@ CORS(app,
      resources={r"/api/*": {
          "origins": ["http://localhost:5173"],
          "methods": ["GET", "POST", "OPTIONS"],
-         "allow_headers": ["Content-Type", "Accept"],
-         "supports_credentials": True
+         "allow_headers": ["Content-Type", "Authorization", "Accept"],
+         "expose_headers": ["Content-Type", "Authorization"],
+         "supports_credentials": True,
+         "max_age": 120  # Cache preflight response for 2 minutes
      }},
      supports_credentials=True)
 def init_db():
