@@ -22,8 +22,34 @@ export function Header() {
           </Link>
           
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#how-it-works" className="text-gray-600 hover:text-black">How It Works</a>
-            <a href="#about" className="text-gray-600 hover:text-black">About Us</a>
+          <button 
+              onClick={() => {
+                navigate('/'); 
+                setTimeout(() => {
+                  const element = document.getElementById('how-it-works');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' }); 
+                  }
+                }, 100); 
+              }} 
+              className="text-gray-600 hover:text-black"
+            >
+              How It Works
+            </button>
+            <button 
+              onClick={() => {
+                navigate('/'); 
+                setTimeout(() => {
+                  const element = document.getElementById('about');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' }); 
+                  }
+                }, 100); 
+              }} 
+              className="text-gray-600 hover:text-black"
+            >
+              About Us
+            </button>
             
             {user ? (
               <div className="flex items-center space-x-4">
