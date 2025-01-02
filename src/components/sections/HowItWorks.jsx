@@ -6,7 +6,7 @@ export function HowItWorks() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl font-bold mb-4">How It Works</h2>
         <p className="text-gray-700">
-          Create, share, and analyze polls with ease. Our platform allows you to engage with your audience and gather valuable insights.
+          Create, share, and analyze polls with ease. Our platform allows you to engage with your audience and gather valuable insights.Whether you're seeking feedback, making group decisions, or simply gauging opinions, we make the process effortless and efficient.
         </p>
         {/* Add more content or features here */}
       </div>

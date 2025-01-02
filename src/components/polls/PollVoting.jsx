@@ -73,39 +73,37 @@ export function PollVoting() {
             </span>
           </div>
 
-          <form onSubmit={handleVote} className="space-y-4">
-            {poll.options.map((option, index) => (
-              <label key={index} className="block p-4 border rounded-lg cursor-pointer transition-all">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="poll-option"
-                    value={index}
-                    checked={selectedOptions.has(index)}
-                    onChange={() => {
-                      const newSelectedOptions = new Set(selectedOptions);
-                      if (newSelectedOptions.has(index)) {
-                        newSelectedOptions.delete(index);
-                      } else {
-                        newSelectedOptions.add(index);
-                      }
-                      setSelectedOptions(newSelectedOptions);
-                    }}
-                    className="w-4 h-4 text-black"
-                  />
-                  <span className="ml-3">{option}</span>
-                </div>
-              </label>
-            ))}
+  <form onSubmit={handleVote} className="space-y-4">
+  {poll.options.map((option, index) => (
+    <label
+      key={index}
+      className={`block p-4 border rounded-lg cursor-pointer transition-all ${
+        selectedOptions.has(index) ? 'bg-orange-500 text-white' : 'bg-white'
+      }`}
+      onClick={() => {
+        const newSelectedOptions = new Set(selectedOptions);
+        if (newSelectedOptions.has(index)) {
+          newSelectedOptions.delete(index);
+        } else {
+          newSelectedOptions.add(index);
+        }
+        setSelectedOptions(newSelectedOptions);
+      }}
+    >
+      {option}
+    </label>
+  ))}
 
-            <button
-              type="submit"
-              disabled={selectedOptions.size === 0 || errorMessage !== ''}
-              className={`w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors ${errorMessage ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {errorMessage ? 'Cannot Submit Vote' : 'Submit Vote'}
-            </button>
-          </form>
+  <button
+    type="submit"
+    disabled={selectedOptions.size === 0 || errorMessage !== ''}
+    className={`w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors ${
+      errorMessage ? 'opacity-50 cursor-not-allowed' : ''
+    }`}
+  >
+    {errorMessage ? 'Cannot Submit Vote' : 'Submit Vote'}
+  </button>
+</form>
         </div>
       </div>
     </div>
