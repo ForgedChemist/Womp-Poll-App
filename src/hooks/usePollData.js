@@ -10,7 +10,7 @@ export function usePollData() {
       const response = await fetch('http://localhost:5000/api/polls', {
         credentials: 'include'
       });
-      if (!response.ok) throw new Error('Failed to fetch polls');
+      if (!response.ok) throw new Error('');
       const data = await response.json();
       setPolls(data);
     } catch (err) {
