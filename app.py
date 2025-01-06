@@ -248,15 +248,29 @@ def register():
             'INSERT INTO users (email, password, name) VALUES (?, ?, ?)',
             (email, generate_password_hash(password), name)
         )
+        user_id = c.lastrowid  # Get the ID of the newly created user
         conn.commit()
         conn.close()
         
-        # Create response and explicitly remove user_id cookie
+        # Create response with user data and set cookie
         response = jsonify({
             'success': True,
-            'user': {'email': email, 'name': name}
+            'user': {
+                'id': user_id,
+                'email': email,
+                'name': name
+            }
         })
-        response.delete_cookie('user_id')  # Add this line to remove any existing user_id cookie
+        response.delete_cookie('user_id')  # Remove any existing cookie
+        # Set new cookie with user_id
+        response.set_cookie(
+            'user_id',
+            str(user_id),
+            httponly=True,
+            samesite='Lax',
+            secure=False,  # Set to True in production with HTTPS
+            max_age=86400  # 24 hours
+        )
         return response
         
     except sqlite3.IntegrityError as e:

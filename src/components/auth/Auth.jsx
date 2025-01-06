@@ -14,6 +14,7 @@ export function Auth() {
   useEffect(() => {
     if (user) {
       navigate('/dashboard');
+
     }
   }, [user, navigate]);
 
